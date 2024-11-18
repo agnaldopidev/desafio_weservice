@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -11,7 +10,7 @@ import (
 
 func main() {
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Microsecond*300)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 	req, err := http.NewRequestWithContext(ctx, "GET", "http://localhost:8080/cotacao", nil)
 	if err != nil {
@@ -21,7 +20,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	log.Print(res.Body)
+	//log.Print(res.Body)
 	defer res.Body.Close()
 	io.Copy(os.Stdout, res.Body)
 }
