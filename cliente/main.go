@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -20,7 +22,25 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	//log.Print(res.Body)
 	defer res.Body.Close()
-	io.Copy(os.Stdout, res.Body)
+
+	if res.StatusCode != http.StatusOK {
+		fmt.Println("Erro no resultaldo")
+		return
+	}
+
+	file, err := os.Create("arquivo.txt")
+	if err != nil {
+		fmt.Println("Erro ao criar arquivo")
+		return
+	}
+
+	defer file.Close()
+
+	_, err = io.Copy(file, res.Body)
+	if err != nil {
+		fmt.Println("Erro ao escrever arquivo")
+		return
+	}
+	log.Print("Processo finalizado")
 }
