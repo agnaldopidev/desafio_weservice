@@ -32,7 +32,7 @@ type Cotacao struct {
 }
 
 type Dolar struct {
-	Valor float64
+	Dolar float64 `json:"dolar"`
 }
 
 func main() {
@@ -41,26 +41,34 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+
 	ctx := r.Context()
-	log.Println("\n\nRequest iniciada...")
-	defer log.Println("Requst finalizada")
+	defer log.Println("Request finalizada")
 	select {
-	case <-time.After(time.Second * 10):
+	case <-time.After(time.Second * 2):
 
-		log.Println("Request processada com sucesso")
-
-		val, err := buscarDadosApi()
+		dolar, err := buscarDadosApi()
 
 		if err != nil {
 			log.Println(err)
 			panic(err)
 		}
 
-		err = salvar(val.Valor)
+		err = salvar(dolar.Dolar)
 		if err != nil {
+			log.Println(err)
 			panic(err)
 		}
-		w.Write([]byte("Process ok"))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		err = json.NewEncoder(w).Encode(dolar)
+		if err != nil {
+			http.Error(w, "Erro ao gerar json", http.StatusInternalServerError)
+		}
+
+		log.Println("Request processada com sucesso")
 	case <-ctx.Done():
 		log.Println("Request cancelada pele cliente")
 	}
@@ -92,13 +100,14 @@ func buscarDadosApi() (*Dolar, error) {
 
 	dolar, err := strconv.ParseFloat(dados.USDBRL.Bid, 64)
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return nil, err
 	}
-	return &Dolar{Valor: dolar}, nil
+	return &Dolar{Dolar: dolar}, nil
 }
 
 func salvar(valor float64) error {
-	_, cancel := context.WithTimeout(context.Background(), time.Second*2)
+	_, cancel := context.WithTimeout(context.Background(), time.Second*1)
 	defer cancel()
 	db, err := sql.Open("sqlite3", "./cotacao.db")
 	if err != nil {
@@ -124,6 +133,7 @@ func salvar(valor float64) error {
 	_, err = db.Exec("INSERT INTO cotacao (valor) VALUES (?)", valor)
 	if err != nil {
 		log.Fatalf("Erro ao inserir dados: %v", err)
+		return err
 	}
 	return nil
 }

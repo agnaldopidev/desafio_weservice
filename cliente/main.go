@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -12,26 +11,28 @@ import (
 
 func main() {
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 	req, err := http.NewRequestWithContext(ctx, "GET", "http://localhost:8080/cotacao", nil)
 	if err != nil {
-		panic(err)
+		log.Println(err.Error())
+		return
 	}
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		panic(err)
+		log.Println(err.Error())
+		return
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		fmt.Println("Erro no resultaldo")
+		log.Println("Erro no resultaldo")
 		return
 	}
 
-	file, err := os.Create("arquivo.txt")
+	file, err := os.Create("cotacao.txt")
 	if err != nil {
-		fmt.Println("Erro ao criar arquivo")
+		log.Println(err.Error())
 		return
 	}
 
@@ -39,7 +40,7 @@ func main() {
 
 	_, err = io.Copy(file, res.Body)
 	if err != nil {
-		fmt.Println("Erro ao escrever arquivo")
+		log.Println(err.Error())
 		return
 	}
 	log.Print("Processo finalizado")
