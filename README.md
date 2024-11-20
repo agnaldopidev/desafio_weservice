@@ -1,4 +1,4 @@
-# desafio_weservice
+# Desafio Wservice
 
 Este é um projeto como resposta do Curso de Go Expert de Pós Graduação
 
@@ -9,14 +9,15 @@ Este é um projeto como resposta do Curso de Go Expert de Pós Graduação
 
 ```bash
 $ git clone git@github.com:agnaldopidev/desafio_weservice.git 
+```
 
 3. Execute o comando:
-
 ```bash
 $ cd desafio_weservice/server
 $ go run main.go
+```
 
 ```bash
 $ cd desafio_weservice/cliente
 $ go run main.go
-
+```
