@@ -45,8 +45,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	defer log.Println("Request finalizada")
 	select {
-	case <-time.After(time.Second * 2):
-
+	case <-time.After(time.Millisecond * 200):
 		dolar, err := buscarDadosApi()
 
 		if err != nil {
@@ -54,21 +53,21 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 
-		err = salvar(dolar.Dolar)
-		if err != nil {
-			log.Println(err)
-			panic(err)
-		}
+		go func(valor float64) {
+			err := salvar(valor)
+			if err != nil {
+				log.Println(err)
+				panic(err)
+			}
+		}(dolar.Dolar)
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-
 		err = json.NewEncoder(w).Encode(dolar)
 		if err != nil {
 			http.Error(w, "Erro ao gerar json", http.StatusInternalServerError)
 		}
 
-		log.Println("Request processada com sucesso")
 	case <-ctx.Done():
 		log.Println("Request cancelada pele cliente")
 	}
@@ -107,7 +106,7 @@ func buscarDadosApi() (*Dolar, error) {
 }
 
 func salvar(valor float64) error {
-	_, cancel := context.WithTimeout(context.Background(), time.Second*1)
+	_, cancel := context.WithTimeout(context.Background(), time.Millisecond*10)
 	defer cancel()
 	db, err := sql.Open("sqlite3", "./cotacao.db")
 	if err != nil {

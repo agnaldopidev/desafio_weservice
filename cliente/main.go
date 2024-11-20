@@ -11,7 +11,7 @@ import (
 
 func main() {
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*300)
 	defer cancel()
 	req, err := http.NewRequestWithContext(ctx, "GET", "http://localhost:8080/cotacao", nil)
 	if err != nil {
@@ -25,6 +25,10 @@ func main() {
 	}
 	defer res.Body.Close()
 
+	if res.Body == nil {
+		panic("Erro na respota")
+	}
+
 	if res.StatusCode != http.StatusOK {
 		log.Println("Erro no resultaldo")
 		return
@@ -33,15 +37,13 @@ func main() {
 	file, err := os.Create("cotacao.txt")
 	if err != nil {
 		log.Println(err.Error())
-		return
 	}
 
 	defer file.Close()
-
 	_, err = io.Copy(file, res.Body)
 	if err != nil {
 		log.Println(err.Error())
-		return
 	}
+
 	log.Print("Processo finalizado")
 }
