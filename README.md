@@ -1,4 +1,4 @@
-# Desafio Wservice
+# Desafio Weservice
 
 Este é um projeto como resposta do Curso de Go Expert de Pós Graduação
 
